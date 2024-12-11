@@ -6,7 +6,7 @@ use structopt::StructOpt;
 #[derive(StructOpt)]
 enum Cli {
     Decode {
-        #[structopt(help = "(i.e. index.bif)")]
+        #[structopt(help = "(e.g. index.bif)")]
         bif_file: PathBuf,
 
         #[structopt(help = "directory images will be saved to")]
@@ -16,13 +16,13 @@ enum Cli {
         #[structopt(help = "directory containing images to be indexed")]
         images: PathBuf,
 
-        #[structopt(help = "(i.e. index.bif)")]
+        #[structopt(help = "(e.g. index.bif)")]
         bif_file: PathBuf,
 
         #[structopt(
             long = "ti",
             default_value = "1",
-            help = "Timestamp interval (in seconds) between images"
+            help = "Timestamp interval between images (multiplied by the framewise separation value to determine timestamp values in milliseconds)"
         )]
         timestamp_interval: u32,
 
@@ -43,7 +43,7 @@ fn main() {
             let b = bif::decode(&bif_file);
             println!("BIF Version: {}", b.version);
             println!("Number of images: {}", b.total_images);
-            println!("Framewise Separation: {} ms", b.framewise_separation);
+            println!("Framewise Separation: {}ms", b.framewise_separation);
             println!("Generating images...");
             bif::extract_images(b, &output);
             println!("Finished.");
@@ -62,7 +62,11 @@ fn main() {
             }
             jpegs.sort();
             let b = bif::encode(jpegs, bif_file, timestamp_interval, framewise_separation);
-            println!("{:#?}", b.path);
+            println!("BIF Version: {}", b.version);
+            println!("Number of images: {}", b.total_images);
+            println!("Timestamp Interval: {}", timestamp_interval);
+            println!("Framewise Separation: {}ms", b.framewise_separation);
+            println!("Finished.");
         }
     }
 }
