@@ -56,12 +56,18 @@ fn main() {
         } => {
             assert!(images.is_dir(), "images must be a directory");
             let base_path = images.to_str().expect("couldn't coerce path to str");
-            let mut jpegs = Vec::<PathBuf>::new();
-            for entry in glob(format!("{}/*.jpg", base_path).as_str()).expect("failed to glob") {
-                jpegs.push(entry.expect("no file"));
+            let mut images = Vec::<PathBuf>::new();
+            for entry in glob(&format!("{base_path}/*")).expect("failed to glob") {
+                let path = entry.expect("no file");
+                match path.extension().and_then(|e| e.to_str()) {
+                    Some("jpg") | Some("jpeg") | Some("webp") => {
+                        images.push(path);
+                    }
+                    _ => {}
+                }
             }
-            jpegs.sort();
-            let b = bif::encode(jpegs, bif_file, timestamp_interval, framewise_separation);
+            images.sort();
+            let b = bif::encode(images, bif_file, timestamp_interval, framewise_separation);
             println!("BIF Version: {}", b.version);
             println!("Number of images: {}", b.total_images);
             println!("Timestamp Interval: {}", timestamp_interval);
